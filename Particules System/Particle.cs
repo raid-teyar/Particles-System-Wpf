@@ -10,10 +10,11 @@ namespace Particules_System
 {
     public class Particle
     {
-        public double size { get; set; }
+        public int size { get; set; }
         public TimeSpan life { get; set; }
         public Brush colore { get; set; }
         public Point position { get; set; }
-        public double speed { get; set; }
+        public int speed { get; set; }
+        public double opacity { get; set; }
     }
 }
