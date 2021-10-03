@@ -14,24 +14,39 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
-        <Canvas
-            x:Name="myCanvas"
-            Grid.Column="1"
-            Background="Black" />
-        <StackPanel>
-            <TextBlock Text="Controles" />
+
+        <Viewbox Grid.Column="1">
+            <Canvas
+               
+                x:Name="myCanvas"
+                Width="800"
+                Height="550"
+                ClipToBounds="True" Background="#FF2E2E2E" />
+        </Viewbox>
+
+
+
+        <StackPanel VerticalAlignment="Bottom">
             <Button
-                Margin="10"
-                Click="Button_Click"
-                Content="Generate" />
-            <Button
-                Margin="10"
-                Click="Button_Click_1"
-                Content="Stop" />
-            <Button
-                Margin="10"
+                Margin="5"
                 Click="Button_Click_2"
                 Content="Clear" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                Margin="5"
+                Click="Button_Click"
+                Content="Generate" />
+                <Button
+                Grid.Column="1"
+                Margin="5"
+                Click="Button_Click_1"
+                Content="Stop" />
+            </Grid>
+
         </StackPanel>
     </Grid>
 </Window>

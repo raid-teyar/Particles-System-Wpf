@@ -24,12 +24,96 @@ namespace Particules_System
         DispatcherTimer timer = new DispatcherTimer();
         Random rnd = new Random();
 
-        const int sizeRangeOffset = 10;
-        const int lifeRangeOffset = 1000;
-        const int coloreRangeOffset = 100;
-        const int positionRangeOffset = 200;
-        const int speedRangeOffset = 5;
-        //const double opacityRangeOffset = 0.2;
+        #region Dpendency Propreties
+
+
+        public int sizeRangeOffset
+        {
+            get { return (int)GetValue(sizeRangeOffsetProperty); }
+            set { SetValue(sizeRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for sizeRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty sizeRangeOffsetProperty =
+            DependencyProperty.Register("sizeRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(10));
+
+
+
+        public int coloreRangeOffset
+        {
+            get { return (int)GetValue(coloreRangeOffsetProperty); }
+            set { SetValue(coloreRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for coloreRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty coloreRangeOffsetProperty =
+            DependencyProperty.Register("coloreRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(100));
+
+
+
+        public int lifeRangeOffset
+        {
+            get { return (int)GetValue(lifeRangeOffsetProperty); }
+            set { SetValue(lifeRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for lifeRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty lifeRangeOffsetProperty =
+            DependencyProperty.Register("lifeRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(1000));
+
+
+
+        public int xPositionRangeOffset
+        {
+            get { return (int)GetValue(xPositionRangeOffsetProperty); }
+            set { SetValue(xPositionRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for xPositionRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty xPositionRangeOffsetProperty =
+            DependencyProperty.Register("xPositionRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(400));
+
+
+
+        public int yPositionRangeOffset
+        {
+            get { return (int)GetValue(yPositionRangeOffsetProperty); }
+            set { SetValue(yPositionRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for yPositionRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty yPositionRangeOffsetProperty =
+            DependencyProperty.Register("yPositionRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(270));
+
+
+
+
+        public int speedRangeOffset
+        {
+            get { return (int)GetValue(speedRangeOffsetProperty); }
+            set { SetValue(speedRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for speedRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty speedRangeOffsetProperty =
+            DependencyProperty.Register("speedRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(5));
+
+
+
+
+        public int opacityRangeOffset
+        {
+            get { return (int)GetValue(opacityRangeOffsetProperty); }
+            set { SetValue(opacityRangeOffsetProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for opacityRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty opacityRangeOffsetProperty =
+            DependencyProperty.Register("opacityRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(0.2));
+
+
+
+        #endregion
 
         Point screenCenter;
 
@@ -37,7 +121,7 @@ namespace Particules_System
         {
             InitializeComponent();
 
-            timer.Interval = TimeSpan.FromMilliseconds(33.33);
+            timer.Interval = TimeSpan.FromMilliseconds(5);
             timer.Tick += Timer_Tick;
         }
 
@@ -65,12 +149,12 @@ namespace Particules_System
                 Height = particle.size,
                 Width = particle.size,
                 Fill = particle.colore,
-                Stroke = particle.colore,
+                StrokeThickness = 0,
                 Opacity = particle.opacity
 
             };
-            Canvas.SetBottom(myCanvas, particle.position.Y);
-            Canvas.SetRight(myCanvas, particle.position.X);
+            Canvas.SetBottom(ellipse, particle.position.Y);
+            Canvas.SetRight(ellipse, particle.position.X);
             myCanvas.Children.Add(ellipse);
         }
 
@@ -81,7 +165,7 @@ namespace Particules_System
                 size = rnd.Next(sizeRng - sizeRangeOffset, sizeRng + sizeRangeOffset),
                 life = TimeSpan.FromMilliseconds(rnd.Next(Convert.ToInt32(lifeRng.TotalMilliseconds - TimeSpan.FromMilliseconds(lifeRangeOffset).TotalMilliseconds), Convert.ToInt32(lifeRng.TotalMilliseconds + TimeSpan.FromMilliseconds(lifeRangeOffset).TotalMilliseconds))),
                 colore = new SolidColorBrush(Color.FromArgb(Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)))),
-                position = new Point(rnd.Next(Convert.ToInt32(positionRng.X - positionRangeOffset), Convert.ToInt32(positionRng.X + positionRangeOffset)), rnd.Next(Convert.ToInt32(positionRng.Y - positionRangeOffset), Convert.ToInt32(positionRng.Y + positionRangeOffset))),
+                position = new Point(rnd.Next(Convert.ToInt32(positionRng.X - xPositionRangeOffset), Convert.ToInt32(positionRng.X + xPositionRangeOffset)), rnd.Next(Convert.ToInt32(positionRng.Y - yPositionRangeOffset), Convert.ToInt32(positionRng.Y + yPositionRangeOffset))),
                 speed = rnd.Next(speedRng - speedRangeOffset, speedRng + speedRangeOffset),
                 opacity = rnd.NextDouble()
             };
