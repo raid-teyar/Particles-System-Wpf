@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using PaletteMixr;
 
 namespace Particules_System
 {
@@ -21,8 +22,15 @@ namespace Particules_System
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         DispatcherTimer timer = new DispatcherTimer();
         Random rnd = new Random();
+        readonly Point screenOffset = new Point(40, 50);
+        System.Drawing.Color rndColor;
+
+        List<Particle> particles = new List<Particle>();
+
+        List<Shape> shapes = new List<Shape>();
 
         #region Dpendency Propreties
 
@@ -35,19 +43,19 @@ namespace Particules_System
 
         // Using a DependencyProperty as the backing store for sizeRangeOffset.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty sizeRangeOffsetProperty =
-            DependencyProperty.Register("sizeRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(10));
+            DependencyProperty.Register("sizeRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(100));
 
 
 
-        public int coloreRangeOffset
+        public int colorRangeOffset
         {
-            get { return (int)GetValue(coloreRangeOffsetProperty); }
-            set { SetValue(coloreRangeOffsetProperty, value); }
+            get { return (int)GetValue(colorRangeOffsetProperty); }
+            set { SetValue(colorRangeOffsetProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for coloreRangeOffset.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty coloreRangeOffsetProperty =
-            DependencyProperty.Register("coloreRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(100));
+        // Using a DependencyProperty as the backing store for colorRangeOffset.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty colorRangeOffsetProperty =
+            DependencyProperty.Register("colorRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(90));
 
 
 
@@ -96,20 +104,20 @@ namespace Particules_System
 
         // Using a DependencyProperty as the backing store for speedRangeOffset.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty speedRangeOffsetProperty =
-            DependencyProperty.Register("speedRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(5));
+            DependencyProperty.Register("speedRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(10));
 
 
 
 
-        public int opacityRangeOffset
+        public double opacityRangeOffset
         {
-            get { return (int)GetValue(opacityRangeOffsetProperty); }
+            get { return (double)GetValue(opacityRangeOffsetProperty); }
             set { SetValue(opacityRangeOffsetProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for opacityRangeOffset.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty opacityRangeOffsetProperty =
-            DependencyProperty.Register("opacityRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(0.2));
+            DependencyProperty.Register("opacityRangeOffset", typeof(double), typeof(MainWindow), new PropertyMetadata(0.2));
 
 
 
@@ -120,13 +128,14 @@ namespace Particules_System
         public MainWindow()
         {
             InitializeComponent();
-
-            timer.Interval = TimeSpan.FromMilliseconds(5);
+            DataContext = this;
+            timer.Interval = TimeSpan.FromMilliseconds(speedRangeOffset);
             timer.Tick += Timer_Tick;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            rndColor = System.Drawing.Color.FromArgb(Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)));
             timer.Start();
         }
 
@@ -142,37 +151,64 @@ namespace Particules_System
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            screenCenter = new Point(myCanvas.ActualWidth / 2, myCanvas.ActualHeight / 2);
-            Particle particle = CreateParticle(20, TimeSpan.FromMilliseconds(2000), screenCenter, 10);
+            screenCenter = new Point(myCanvas.ActualWidth / 2 - screenOffset.X, myCanvas.ActualHeight / 2 - screenOffset.Y);
+            Particle particle = CreateParticle(sizeRangeOffset / 2, TimeSpan.FromMilliseconds(2000), screenCenter, 10, rndColor);
+            if (particle.size < 0)
+            {
+                particle.size = -particle.size;
+            }
             Ellipse ellipse = new Ellipse()
             {
                 Height = particle.size,
                 Width = particle.size,
-                Fill = particle.colore,
-                StrokeThickness = 0,
+                Fill = particle.color,
                 Opacity = particle.opacity
-
             };
+            shapes.Add(ellipse);
+            
+            
+
             Canvas.SetBottom(ellipse, particle.position.Y);
             Canvas.SetRight(ellipse, particle.position.X);
             myCanvas.Children.Add(ellipse);
         }
 
-        private Particle CreateParticle(int sizeRng, TimeSpan lifeRng, Point positionRng, int speedRng)
+        public System.Drawing.Color GenerateColorPalette(System.Drawing.Color baseColor)
         {
+           PaletteGenerator PaletteGenerator = new PaletteGenerator(baseColor);
+           List<System.Drawing.Color> colors =  PaletteGenerator.GenerateSaturationPalette(PaletteSize.Small).ToList();
+           return colors[rnd.Next(0, colors.Count)]; 
+        }
+
+        private Particle CreateParticle(int sizeRng, TimeSpan lifeRng, Point positionRng, int speedRng, System.Drawing.Color color)
+        {
+            Color generatedColor;
+
+            if ((bool)isPalette.IsChecked)
+            {
+                 generatedColor = Color.FromArgb(GenerateColorPalette(color).A, GenerateColorPalette(color).R, GenerateColorPalette(color).G, GenerateColorPalette(color).B);
+            }
+            else
+            {
+                generatedColor = Color.FromArgb(Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)));
+            }
+
             Particle particle = new Particle()
             {
                 size = rnd.Next(sizeRng - sizeRangeOffset, sizeRng + sizeRangeOffset),
                 life = TimeSpan.FromMilliseconds(rnd.Next(Convert.ToInt32(lifeRng.TotalMilliseconds - TimeSpan.FromMilliseconds(lifeRangeOffset).TotalMilliseconds), Convert.ToInt32(lifeRng.TotalMilliseconds + TimeSpan.FromMilliseconds(lifeRangeOffset).TotalMilliseconds))),
-                colore = new SolidColorBrush(Color.FromArgb(Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)))),
+                color = new SolidColorBrush(generatedColor),
                 position = new Point(rnd.Next(Convert.ToInt32(positionRng.X - xPositionRangeOffset), Convert.ToInt32(positionRng.X + xPositionRangeOffset)), rnd.Next(Convert.ToInt32(positionRng.Y - yPositionRangeOffset), Convert.ToInt32(positionRng.Y + yPositionRangeOffset))),
                 speed = rnd.Next(speedRng - speedRangeOffset, speedRng + speedRangeOffset),
-                opacity = rnd.NextDouble()
+                opacity = rnd.NextDouble() * (1 - opacityRangeOffset - (1 + opacityRangeOffset)) + (1 - opacityRangeOffset)
             };
-           
+
             return particle;
         }
 
-       
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            timer.Interval = TimeSpan.FromMilliseconds(speedRangeOffset);
+        }
     }
 }

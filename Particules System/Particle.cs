@@ -12,7 +12,7 @@ namespace Particules_System
     {
         public int size { get; set; }
         public TimeSpan life { get; set; }
-        public Brush colore { get; set; }
+        public Brush color { get; set; }
         public Point position { get; set; }
         public int speed { get; set; }
         public double opacity { get; set; }
