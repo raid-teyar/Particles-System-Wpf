@@ -16,5 +16,10 @@ namespace Particules_System
         public Point position { get; set; }
         public int speed { get; set; }
         public double opacity { get; set; }
+
+        
+
+       
+        
     }
 }

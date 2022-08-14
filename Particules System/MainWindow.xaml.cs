@@ -1,19 +1,13 @@
-﻿ using System;
+﻿using PaletteMixr;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using PaletteMixr;
 
 namespace Particules_System
 {
@@ -22,17 +16,28 @@ namespace Particules_System
     /// </summary>
     public partial class MainWindow : Window
     {
-        
         DispatcherTimer timer = new DispatcherTimer();
         Random rnd = new Random();
         readonly Point screenOffset = new Point(40, 50);
         System.Drawing.Color rndColor;
 
-        List<Particle> particles = new List<Particle>();
-
-        List<Shape> shapes = new List<Shape>();
+      
+        PaletteSize paletteSize = PaletteSize.Small;
 
         #region Dpendency Propreties
+
+
+
+        public int objectsCount
+        {
+            get { return (int)GetValue(objectsCountProperty); }
+            set { SetValue(objectsCountProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for objectsCount.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty objectsCountProperty =
+            DependencyProperty.Register("objectsCount", typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+
 
 
         public int sizeRangeOffset
@@ -57,20 +62,6 @@ namespace Particules_System
         public static readonly DependencyProperty colorRangeOffsetProperty =
             DependencyProperty.Register("colorRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(90));
 
-
-
-        public int lifeRangeOffset
-        {
-            get { return (int)GetValue(lifeRangeOffsetProperty); }
-            set { SetValue(lifeRangeOffsetProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for lifeRangeOffset.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty lifeRangeOffsetProperty =
-            DependencyProperty.Register("lifeRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(1000));
-
-
-
         public int xPositionRangeOffset
         {
             get { return (int)GetValue(xPositionRangeOffsetProperty); }
@@ -93,9 +84,6 @@ namespace Particules_System
         public static readonly DependencyProperty yPositionRangeOffsetProperty =
             DependencyProperty.Register("yPositionRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(270));
 
-
-
-
         public int speedRangeOffset
         {
             get { return (int)GetValue(speedRangeOffsetProperty); }
@@ -106,9 +94,6 @@ namespace Particules_System
         public static readonly DependencyProperty speedRangeOffsetProperty =
             DependencyProperty.Register("speedRangeOffset", typeof(int), typeof(MainWindow), new PropertyMetadata(10));
 
-
-
-
         public double opacityRangeOffset
         {
             get { return (double)GetValue(opacityRangeOffsetProperty); }
@@ -118,7 +103,6 @@ namespace Particules_System
         // Using a DependencyProperty as the backing store for opacityRangeOffset.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty opacityRangeOffsetProperty =
             DependencyProperty.Register("opacityRangeOffset", typeof(double), typeof(MainWindow), new PropertyMetadata(0.2));
-
 
 
         #endregion
@@ -135,6 +119,7 @@ namespace Particules_System
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            
             rndColor = System.Drawing.Color.FromArgb(Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)), Convert.ToByte(rnd.Next(0, 255)));
             timer.Start();
         }
@@ -146,6 +131,7 @@ namespace Particules_System
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
+            objectsCount = 0;
             myCanvas.Children.Clear();
         }
 
@@ -157,27 +143,91 @@ namespace Particules_System
             {
                 particle.size = -particle.size;
             }
-            Ellipse ellipse = new Ellipse()
-            {
-                Height = particle.size,
-                Width = particle.size,
-                Fill = particle.color,
-                Opacity = particle.opacity
-            };
-            shapes.Add(ellipse);
-            
-            
 
-            Canvas.SetBottom(ellipse, particle.position.Y);
-            Canvas.SetRight(ellipse, particle.position.X);
-            myCanvas.Children.Add(ellipse);
+            Shape shape = null;
+
+            switch (shapeBox.Text)
+            {
+                case "Circle":
+
+                    Ellipse ellipse = new Ellipse()
+                    {
+                        Height = particle.size,
+                        Width = particle.size,
+                        Fill = particle.color,
+                        Opacity = particle.opacity
+                    };
+
+                    shape = ellipse;
+
+                    break;
+
+                case "Square":
+
+                    Rectangle rectangle = new Rectangle()
+                    {
+                        Height = particle.size,
+                        Width = particle.size,
+                        Fill = particle.color,
+                        Opacity = particle.opacity
+                    };
+
+                    shape = rectangle;
+
+                    break;
+                case "Both":
+
+                    int num = rnd.Next(0, 2);
+                    bool choice = true ? num == 1 : false;
+
+                    if (choice)
+                    {
+                        Rectangle rectangle2 = new Rectangle()
+                        {
+                            Height = particle.size,
+                            Width = particle.size,
+                            Fill = particle.color,
+                            Opacity = particle.opacity
+                        };
+
+                        shape = rectangle2;
+                    }
+                    else
+                    {
+                        Ellipse ellipse2 = new Ellipse()
+                        {
+                            Height = particle.size,
+                            Width = particle.size,
+                            Fill = particle.color,
+                            Opacity = particle.opacity
+                        };
+
+                        shape = ellipse2;
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            
+            objectsCount++;
+            if (objectsCount >= 500) 
+            {
+                myCanvas.Children.RemoveRange(0, 1);
+                objectsCount = 499;
+            }
+            Canvas.SetBottom(shape, particle.position.Y);
+            Canvas.SetRight(shape, particle.position.X);
+            myCanvas.Children.Add(shape);
         }
 
         public System.Drawing.Color GenerateColorPalette(System.Drawing.Color baseColor)
         {
-           PaletteGenerator PaletteGenerator = new PaletteGenerator(baseColor);
-           List<System.Drawing.Color> colors =  PaletteGenerator.GenerateSaturationPalette(PaletteSize.Small).ToList();
-           return colors[rnd.Next(0, colors.Count)]; 
+            PaletteGenerator PaletteGenerator = new PaletteGenerator(baseColor);
+            List<System.Drawing.Color> colors = PaletteGenerator.GenerateSaturationPalette(paletteSize).ToList();
+            return colors[rnd.Next(0, colors.Count)];
         }
 
         private Particle CreateParticle(int sizeRng, TimeSpan lifeRng, Point positionRng, int speedRng, System.Drawing.Color color)
@@ -186,17 +236,16 @@ namespace Particules_System
 
             if ((bool)isPalette.IsChecked)
             {
-                 generatedColor = Color.FromArgb(GenerateColorPalette(color).A, GenerateColorPalette(color).R, GenerateColorPalette(color).G, GenerateColorPalette(color).B);
+                generatedColor = Color.FromArgb(GenerateColorPalette(color).A, GenerateColorPalette(color).R, GenerateColorPalette(color).G, GenerateColorPalette(color).B);
             }
             else
             {
-                generatedColor = Color.FromArgb(Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)));
+                generatedColor = Color.FromRgb(Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)), Convert.ToByte(rnd.Next(128 - colorRangeOffset, 128 + colorRangeOffset)));
             }
 
             Particle particle = new Particle()
             {
                 size = rnd.Next(sizeRng - sizeRangeOffset, sizeRng + sizeRangeOffset),
-                life = TimeSpan.FromMilliseconds(rnd.Next(Convert.ToInt32(lifeRng.TotalMilliseconds - TimeSpan.FromMilliseconds(lifeRangeOffset).TotalMilliseconds), Convert.ToInt32(lifeRng.TotalMilliseconds + TimeSpan.FromMilliseconds(lifeRangeOffset).TotalMilliseconds))),
                 color = new SolidColorBrush(generatedColor),
                 position = new Point(rnd.Next(Convert.ToInt32(positionRng.X - xPositionRangeOffset), Convert.ToInt32(positionRng.X + xPositionRangeOffset)), rnd.Next(Convert.ToInt32(positionRng.Y - yPositionRangeOffset), Convert.ToInt32(positionRng.Y + yPositionRangeOffset))),
                 speed = rnd.Next(speedRng - speedRangeOffset, speedRng + speedRangeOffset),
@@ -209,6 +258,38 @@ namespace Particules_System
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             timer.Interval = TimeSpan.FromMilliseconds(speedRangeOffset);
+        }
+
+        private void isPalette_Checked(object sender, RoutedEventArgs e)
+        {
+            paletteSizeBox.IsEnabled = true;
+            paletteSizeBox.Background = Brushes.LightSeaGreen;
+        }
+
+        private void isPalette_Unchecked(object sender, RoutedEventArgs e)
+        {
+            paletteSizeBox.IsEnabled = false;
+        }
+
+        private void paletteSizeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (paletteSizeBox.Text)
+            {
+                case "5":
+                    paletteSize = PaletteSize.Small;
+                    break;
+                case "9":
+                    paletteSize = PaletteSize.Medium;
+                    break;
+                case "13":
+                    paletteSize = PaletteSize.Large;
+                    break;
+                case "17":
+                    paletteSize = PaletteSize.XLarge;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
